@@ -1,0 +1,42 @@
+package:
+  name: ocpipes
+  version: "1.0.0"
+
+source:
+  path: ../
+
+build:
+  noarch: python
+  script: python -m pip install . -vv
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+    - boto3
+    - pytz
+    - tenacity
+    - pandas
+    - psycopg2
+    - joblib
+    - sqlalchemy
+    - geopandas
+    - cryptography
+    - slack_sdk
+    - pyarrow
+    - snowflake-connector-python
+    - pyyaml
+    - awswrangler >=3.9.1
+    - metaflow
+
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+about:
+  home: https://github.com/MoveRDC/ocpipes
+  license: Licensed
+  summary: "ocpipes package"

@@ -1,0 +1,203 @@
+version: 2.1
+
+orbs:
+  move-ci: moverdc/move-ci@0
+
+executors:
+  ubuntu-conda-executor:
+    docker:
+      - image: ubuntu:22.04
+
+jobs:
+  download-from-s3:
+    docker:
+      - image: cimg/aws:2023.09
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - move-ci/aws-web-auth:
+          role-arn: arn:aws:iam::786346568665:role/circleci-oidc-ml
+      - run:
+          name: Download from S3
+          command: |
+            mkdir -p /tmp/ocpipes-working
+            echo "creating conda-bld/noarch conda-bld/linux-64 directory..."
+            mkdir -p /tmp/conda-bld/noarch
+            mkdir -p /tmp/conda-bld/linux-64
+            
+            # Download noarch and linux-64 with error handling
+            aws s3 cp s3://ocpipes-prod/noarch /tmp/conda-bld/noarch --recursive || {
+              echo 'Failed to download files from noarch directory. Using default empty directory.';
+              mkdir -p /tmp/conda-bld/noarch
+            }
+            aws s3 cp s3://ocpipes-prod/linux-64 /tmp/conda-bld/linux-64 --recursive || {
+              echo 'Failed to download files from noarch directory. Using default empty directory.';
+              mkdir -p /tmp/conda-bld/linux-64
+            }
+            
+            # Download index.html with error handling
+            aws s3 cp s3://ocpipes-prod/index.html /tmp/conda-bld/index.html || { echo 'Failed to download index.html. Using default empty file.'; echo '{}' > /tmp/conda-bld/index.html; }
+            
+            # Download channeldata.json with error handling
+            aws s3 cp s3://ocpipes-prod/channeldata.json /tmp/conda-bld/channeldata.json || { echo 'Failed to download channeldata.json. Using default empty file.'; echo '{}' > /tmp/conda-bld/channeldata.json; }
+
+            echo "Downloaded files from S3."
+      - run:
+          name: Copy ocpipes files to /tmp/ocpipes-working
+          command: cp -r /home/circleci/project/* /tmp/ocpipes-working
+      - persist_to_workspace:
+          root: /tmp/conda-bld
+          paths:
+            - noarch
+            - linux-64
+      - persist_to_workspace:
+          root: /tmp/ocpipes-working
+          paths:
+            - ocpipes
+
+  build_conda_package:
+    executor: ubuntu-conda-executor
+    steps:
+      - attach_workspace:
+          at: /tmp/conda-bld
+      - attach_workspace:
+          at: /tmp/ocpipes-working
+
+      # Adding this step to remove old build files
+      - run:
+          name: Clean up old Conda builds
+          command: |
+            echo "Cleaning up old Conda builds..."
+            rm -rf /opt/miniconda/conda-bld/*
+            echo "Cleanup complete."
+      - run:
+          name: Install Dependencies
+          command: |
+            apt-get update && \
+            apt-get install -y wget bzip2 && \
+            wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+            bash /tmp/miniconda.sh -b -p /opt/miniconda && \
+            rm /tmp/miniconda.sh && \
+            /opt/miniconda/bin/conda install conda-build pip --yes
+      - run:
+          name: Installing Conda Build
+          command: |
+            echo "Install Conda Build"
+            /opt/miniconda/bin/conda install conda-build -c conda-forge --yes
+            /opt/miniconda/bin/conda install pip --yes
+            /opt/miniconda/bin/conda install anaconda-client --yes
+            /opt/miniconda/bin/conda config --set anaconda_upload yes
+            /opt/miniconda/bin/conda config --add channels conda-forge
+            /opt/miniconda/bin/conda config --add channels bioconda
+
+      - run:
+          name: Move downloaded Conda Files (old) from /tmp/conda-bld to /opt/miniconda/conda-bld
+          command: |
+            echo "Creating directories in /opt/miniconda/conda-bld..."
+            mkdir -p /opt/miniconda/conda-bld/noarch
+            mkdir -p /opt/miniconda/conda-bld/linux-64
+            echo "Moving files from /tmp/conda-bld to /opt/miniconda/conda-bld..."
+            
+            # Move files from /tmp/conda-bld/noarch/ to /opt/miniconda/conda-bld/noarch/
+            if [ -d /tmp/conda-bld/noarch ] && [ "$(ls -A /tmp/conda-bld/noarch)" ]; then
+                mv /tmp/conda-bld/noarch/* /opt/miniconda/conda-bld/noarch/
+            else
+                echo "No files to move from /tmp/conda-bld/noarch."
+            fi
+
+            # Move files from /tmp/conda-bld/linux-64/ to /opt/miniconda/conda-bld/linux-64/
+            if [ -d /tmp/conda-bld/linux-64 ] && [ "$(ls -A /tmp/conda-bld/linux-64)" ]; then
+                mv /tmp/conda-bld/linux-64/* /opt/miniconda/conda-bld/linux-64/
+            else
+                echo "No files to move from /tmp/conda-bld/linux-64."
+            fi
+
+            # Move channeldata.json from /tmp/conda-bld/ to /opt/miniconda/conda-bld/
+            if [ -f /tmp/conda-bld/channeldata.json ]; then
+                mv /tmp/conda-bld/channeldata.json /opt/miniconda/conda-bld/channeldata.json
+            else
+                echo "File /tmp/conda-bld/channeldata.json not found."
+            fi
+
+            # Move index.html from /tmp/conda-bld/ to /opt/miniconda/conda-bld/
+            if [ -f /tmp/conda-bld/index.html ]; then
+                mv /tmp/conda-bld/index.html /opt/miniconda/conda-bld/index.html
+            else
+                echo "File /tmp/conda-bld/index.html not found."
+            fi
+      - run:
+          name: Build Conda Package
+          command: |
+            # Build Conda package
+            echo "Running OCpipes build process..."            
+            /opt/miniconda/bin/conda build /tmp/ocpipes-working/ocpipes --output-folder /opt/miniconda/conda-bld
+            echo "Indexing conda package"
+            /opt/miniconda/bin/conda index /opt/miniconda/conda-bld
+            echo "Conda Build is ready and indexed."
+
+      - run:
+          name: moving to /tmp/conda-bld
+          command: |
+            mkdir -p /tmp/conda-bld
+            mv /opt/miniconda/conda-bld/* /tmp/conda-bld
+
+      - persist_to_workspace:
+          root: /tmp/conda-bld 
+          paths:
+            - linux-64
+            - noarch
+            - channeldata.json
+            - index.html
+
+  upload-to-s3:
+    docker:
+      - image: cimg/aws:2023.09
+    steps: 
+      - attach_workspace:
+          at: /tmp/conda-bld
+
+      - move-ci/aws-web-auth:
+          role-arn: arn:aws:iam::786346568665:role/circleci-oidc-ml
+      - run:
+          name: Upload Conda Package to S3
+          command: |
+
+            echo "Uploading repodata files back to S3"
+            aws s3 cp /tmp/conda-bld/noarch/repodata.json s3://ocpipes-prod/noarch/repodata.json
+            aws s3 cp /tmp/conda-bld/noarch/current_repodata.json s3://ocpipes-prod/noarch/current_repodata.json
+            aws s3 cp /tmp/conda-bld/noarch/index.html s3://ocpipes-prod/noarch/index.html
+            aws s3 cp /tmp/conda-bld/linux-64/repodata.json s3://ocpipes-prod/linux-64/repodata.json
+            aws s3 cp /tmp/conda-bld/linux-64/current_repodata.json s3://ocpipes-prod/linux-64/current_repodata.json
+            aws s3 cp /tmp/conda-bld/linux-64/index.html s3://ocpipes-prod/linux-64/index.html
+            echo "Uploading channeldata file back to S3"
+            aws s3 cp /tmp/conda-bld/channeldata.json s3://ocpipes-prod/channeldata.json
+
+            PACKAGE_PATH_LATEST=$(find /tmp/conda-bld/noarch/ -name 'ocpipes-*.tar.bz2' | sort -V | tail -n 1)
+            PACKAGE_FILENAME=$(basename "$PACKAGE_PATH_LATEST")
+            echo "Uploading Conda packages to S3..."
+            aws s3 cp "/tmp/conda-bld/noarch/$PACKAGE_FILENAME" s3://ocpipes-prod/noarch/
+
+workflows:
+  build-pipeline:
+    jobs:
+      - download-from-s3:
+          context: [aws]
+          filters:
+            branches:
+              only: main
+      - build_conda_package:
+          requires:
+            - download-from-s3
+          filters:
+            branches:
+              only: main
+          context:
+            - aws
+      - upload-to-s3:
+          filters:
+            branches:
+              only: main
+          requires:
+            - build_conda_package
+          context: [aws]
