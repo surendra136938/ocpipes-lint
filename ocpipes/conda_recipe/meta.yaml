@@ -33,7 +33,6 @@ requirements:
 
 channels:
   - conda-forge
-  - bioconda
   - defaults
 
 about:
