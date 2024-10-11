@@ -11,7 +11,7 @@ To use `ocpipes`, simply import it in your python environment. The most common s
 of tasks to get the go-to training data for Opcity is:
 
 ```
-from ocpipes.db import get_data
+from ocpipes.snowflake import get_data
 
 query = """
 some query
