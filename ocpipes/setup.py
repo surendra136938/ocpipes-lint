@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='ocpipes',
-    version='1.0.0',
+    version='10.0.0',
     packages=['ocpipes'],
     install_requires=[
         'boto3',

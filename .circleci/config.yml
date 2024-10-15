@@ -178,6 +178,36 @@ jobs:
             echo "Uploading Conda packages to S3..."
             aws s3 cp "/tmp/conda-bld/noarch/$PACKAGE_FILENAME" s3://ocpipes-prod/noarch/
 
+  build_and_upload_wheel:
+    docker:
+      - image: cimg/python:3.9  # Use a Python image to build the wheel
+    steps:
+      - checkout
+
+      - move-ci/aws-web-auth:
+          role-arn: arn:aws:iam::786346568665:role/circleci-oidc-ml
+
+      - run:
+          name: Install dependencies
+          command: |
+            python -m venv venv
+            . venv/bin/activate
+            pip install --upgrade pip setuptools wheel boto3
+      - run:
+          name: Build wheel
+          command: |
+            . venv/bin/activate
+            cd ocpipes
+            python setup.py bdist_wheel
+            echo "Wheel built in dist directory"
+      - run:
+          name: Upload wheel to S3
+          command: |
+            . venv/bin/activate
+            WHEEL_FILE=$(ls ocpipes/dist/*.whl)
+            echo "Uploading $WHEEL_FILE to S3"
+            aws s3 cp "$WHEEL_FILE" s3://ocpipes-dev-artifactory/
+
 workflows:
   build-pipeline:
     jobs:
@@ -185,19 +215,24 @@ workflows:
           context: [aws]
           filters:
             branches:
-              only: main
+              only: ocpipes_conda_wheel
       - build_conda_package:
           requires:
             - download-from-s3
           filters:
             branches:
-              only: main
+              only: ocpipes_conda_wheel
           context:
             - aws
       - upload-to-s3:
           filters:
             branches:
-              only: main
+              only: ocpipes_conda_wheel
           requires:
             - build_conda_package
+          context: [aws]
+      - build_and_upload_wheel:
+          filters:
+            branches:
+              only: ocpipes_conda_wheel
           context: [aws]
