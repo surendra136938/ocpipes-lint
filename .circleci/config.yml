@@ -180,7 +180,7 @@ jobs:
 
   build_and_upload_wheel:
     docker:
-      - image: cimg/python:3.9  # Use a Python image to build the wheel
+      - image: cimg/python:3.12
     steps:
       - checkout
 
@@ -206,7 +206,7 @@ jobs:
             . venv/bin/activate
             WHEEL_FILE=$(ls ocpipes/dist/*.whl)
             echo "Uploading $WHEEL_FILE to S3"
-            aws s3 cp "$WHEEL_FILE" s3://ocpipes-dev-artifactory/
+            aws s3 cp "$WHEEL_FILE" s3://ocpipes-artifactory-prod/
 
 workflows:
   build-pipeline:
@@ -215,24 +215,24 @@ workflows:
           context: [aws]
           filters:
             branches:
-              only: ocpipes_conda_wheel
+              only: main
       - build_conda_package:
           requires:
             - download-from-s3
           filters:
             branches:
-              only: ocpipes_conda_wheel
+              only: main
           context:
             - aws
       - upload-to-s3:
           filters:
             branches:
-              only: ocpipes_conda_wheel
+              only: main
           requires:
             - build_conda_package
           context: [aws]
       - build_and_upload_wheel:
           filters:
             branches:
-              only: ocpipes_conda_wheel
+              only: main
           context: [aws]
