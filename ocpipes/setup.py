@@ -2,11 +2,17 @@ from setuptools import setup
 
 setup(
     name='ocpipes',
-    version='1.0.0',
+    version='0.0.0',
     packages=['ocpipes'],
     install_requires=[
         'boto3',
+        'pytz',
+        'tenacity',
         'pandas',
+        'psycopg2',
+        'joblib',
+        'sqlalchemy',
+        'geopandas',
         'cryptography',
         'slack_sdk',
         'pyarrow',
