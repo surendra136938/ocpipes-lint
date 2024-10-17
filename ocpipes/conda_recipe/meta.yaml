@@ -1,6 +1,6 @@
 package:
   name: ocpipes
-  version: "1.0.0"
+  version: "0.0.0"
 
 source:
   path: ../
@@ -16,7 +16,13 @@ requirements:
   run:
     - python
     - boto3
+    - pytz
+    - tenacity
     - pandas
+    - psycopg2
+    - joblib
+    - sqlalchemy
+    - geopandas
     - cryptography
     - slack_sdk
     - pyarrow
