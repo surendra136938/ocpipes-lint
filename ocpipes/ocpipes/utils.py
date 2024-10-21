@@ -48,7 +48,8 @@ def date_ranges_between(
     delta: int | datetime.timedelta = datetime.timedelta(days=7),
     verbose: bool = True,
 ) -> Iterator[tuple[pd.Timestamp, pd.Timestamp]]:
-    """Generator that yields tuples of start/end periods between a range of dates with period length specified by a timedelta.
+    """Generator that yields tuples of start/end periods between a
+    range of dates with period length specified by a timedelta.
 
     Args:
         start (date): The date to start the first period from.
@@ -75,7 +76,9 @@ def date_ranges_between(
         current += delta
 
 
-def batch_idx(sequence: Sequence[Any], batch_size: int = 1, verbose: bool = True) -> Iterator[tuple[int, int]]:
+def batch_idx(
+    sequence: Sequence[Any], batch_size: int = 1, verbose: bool = True
+) -> Iterator[tuple[int, int]]:
     """Generator that yields tuples of start/end indexes to separate the sequence into batches.
 
     Args:
@@ -89,11 +92,15 @@ def batch_idx(sequence: Sequence[Any], batch_size: int = 1, verbose: bool = True
     seq_len = len(sequence)
     for idx in range(0, seq_len, batch_size):
         if verbose:
-            logger.info(f"Batching {idx}-{min(idx + batch_size, seq_len)} of {seq_len}.")
+            logger.info(
+                f"Batching {idx}-{min(idx + batch_size, seq_len)} of {seq_len}."
+            )
         yield idx, min(idx + batch_size, seq_len)
 
 
-def batch(sequence: Sequence[Any], batch_size: int = 1, verbose: bool = True) -> Iterator[Sequence[Any]]:
+def batch(
+    sequence: Sequence[Any], batch_size: int = 1, verbose: bool = True
+) -> Iterator[Sequence[Any]]:
     """Breaks a sequence up into separate sequences each of length batch_size.
 
     Args:
@@ -104,7 +111,9 @@ def batch(sequence: Sequence[Any], batch_size: int = 1, verbose: bool = True) ->
     Yields:
         An object of the same type as sequence, with length `batch_size` (or shorter if it's the terminal batch).
     """
-    for batch_idx_start, batch_idx_end in batch_idx(sequence=sequence, batch_size=batch_size, verbose=verbose):
+    for batch_idx_start, batch_idx_end in batch_idx(
+        sequence=sequence, batch_size=batch_size, verbose=verbose
+    ):
         yield sequence[batch_idx_start:batch_idx_end]
 
 
@@ -156,7 +165,11 @@ def pairwise(iterable):
 
 
 def get_age_days(bucket, prefix):
-    last_modified_ts = boto3.Session().client("s3").get_object(Bucket=bucket, Key=prefix)["LastModified"]
+    last_modified_ts = (
+        boto3.Session()
+        .client("s3")
+        .get_object(Bucket=bucket, Key=prefix)["LastModified"]
+    )
     now_ts = datetime.datetime.now(tzutc())
     return (now_ts - last_modified_ts).days
 
@@ -179,16 +192,23 @@ def check_s3_path(bucket, key):
 
 def list_s3_folders(bucket, prefix):
     if len(prefix) > 0 and prefix[-1] != "/":
-        logger.warning('Should include ending "/" in prefix if wanting all folders in prefix')
+        logger.warning(
+            'Should include ending "/" in prefix if wanting all folders in prefix'
+        )
     s3 = boto3.Session().client("s3")
     response = s3.list_objects(Bucket=bucket, Prefix=prefix, Delimiter="/")
     # Get the last folder name in each path
-    return [Path(folder.get("Prefix")).parts[-1] for folder in response.get("CommonPrefixes", [])]
+    return [
+        Path(folder.get("Prefix")).parts[-1]
+        for folder in response.get("CommonPrefixes", [])
+    ]
 
 
 def list_s3_objects(bucket, prefix):
     if len(prefix) > 0 and prefix[-1] != "/":
-        logger.warning('Should include ending "/" in prefix if wanting all files in prefix')
+        logger.warning(
+            'Should include ending "/" in prefix if wanting all files in prefix'
+        )
     s3 = boto3.Session().client("s3")
     response = s3.list_objects(Bucket=bucket, Prefix=prefix, Delimiter="/")
     # Get the last folder name in each path
@@ -221,7 +241,7 @@ def commit_lock(version: int):
     lock.acquire(blocking=True, timeout=60)
     try:
         yield
-    except:
+    except Exception:
         pass
     finally:
         lock.release()
@@ -241,12 +261,17 @@ class TemporaryNamespace:
 
 
 def load_metaflow_object(
-    flow: str, origin_run_id: int | None = None, data_object: str | None = None, flow_namespace=None
+    flow: str,
+    origin_run_id: int | None = None,
+    data_object: str | None = None,
+    flow_namespace=None,
 ) -> Any:
     """Logic for fetching data from a completed metaflow run
     Example uses:
-    - load_metaflow_object('MyFlow', data_object='results'): Fetch Run.data.results from the last successful MyFlow run
-    - load_metaflow_object('MyFlow', origin_run_id=100, data_object='results'): Fetch Run.data.results from Run('MyFlow/100')
+    - load_metaflow_object('MyFlow', data_object='results'): Fetch Run.data.results from the last
+    successful MyFlow run
+    - load_metaflow_object('MyFlow', origin_run_id=100, data_object='results'): Fetch Run.data.
+    results from Run('MyFlow/100')
     - load_metaflow_object('MyFlow', data_object='results', flow_namespace='user:NotMe'): Fetch Run.data.results from
         the last successful MyFlow run in NotMe's namespace
     Args:
@@ -264,7 +289,9 @@ def load_metaflow_object(
             print(f"Inferred {flow} run id: {data_run_id}")
         else:
             data_run_id = origin_run_id
-            assert Run(f"{flow}/{data_run_id}").successful, f"{flow} flow was found to be unsuccessful"
+            assert Run(
+                f"{flow}/{data_run_id}"
+            ).successful, f"{flow} flow was found to be unsuccessful"
 
         print(f"Loading data from {flow} flow: " f"{flow}/{data_run_id}")
         run = Run(f"{flow}/{data_run_id}")
@@ -272,7 +299,10 @@ def load_metaflow_object(
 
 
 def list_batch_jobs(
-    job_queue: str, job_status: str = "RUNNING", job_name_contains: str | None = None, sort: str = "stoppedAt"
+    job_queue: str,
+    job_status: str = "RUNNING",
+    job_name_contains: str | None = None,
+    sort: str = "stoppedAt",
 ) -> pd.DataFrame:
     """Fetch batch jobs with a specified status and optional name filter.
 
@@ -284,7 +314,8 @@ def list_batch_jobs(
         sort (str, optional): [description]. Defaults to "stoppedAt".
 
     Returns:
-        pd.DataFrame: DataFrame with the columns ['jobId', 'jobName', 'createdAt', 'status', 'statusReason', 'startedAt',
+        pd.DataFrame: DataFrame with the columns ['jobId', 'jobName', 'createdAt', 'status', 'statusReason',
+        'startedAt',
        'stoppedAt', 'container']
             `container` will have error information, if job_status is FAILED
     """

@@ -7,7 +7,9 @@ LOG_CFG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "logging.
 LOG_CFG_OS_ENV_KEY = "LOG_CFG"
 
 
-def setup_logging(default_path=LOG_CFG_PATH, default_level=logging.INFO, env_key=LOG_CFG_OS_ENV_KEY):
+def setup_logging(
+    default_path=LOG_CFG_PATH, default_level=logging.INFO, env_key=LOG_CFG_OS_ENV_KEY
+):
     """
     Setup logging configuration from yaml. Optional path override from environment variable.
     """

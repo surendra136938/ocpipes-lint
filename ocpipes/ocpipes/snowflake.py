@@ -113,7 +113,8 @@ def get_data(
             due to avoiding the Pandas concatentation (PyArrow uses zero-copy reads/concats). Defaults to False.
         verbose (bool, optional): Whether to log additional serialization and memory metrics. Defaults to False.
         warehouse (str, optional): The Snowflake warehouse to use. Defaults to None (`DATASCIENCE_WH`). Other options
-        may include `DATASCIENCE_WH` (Medium), `SYSTEM_DATASCIENCE_WH` (Large), and `SYSTEM_DATASCIENCE_VIP_WH` (X-Large).
+        may include `DATASCIENCE_WH` (Medium), `SYSTEM_DATASCIENCE_WH` (Large), and `SYSTEM_DATASCIENCE_VIP_WH`
+        (X-Large).
         role (str, optional): The Snowflake role to use. Defaults to None (`PRODUCER_DATASCIENCE_ROLE`).
         is_production (bool, optional): Whether to request production snowflake credentials. Defaults to False. If sets
         to True, the `SYSTEM_DATASCIENCE_WH` will be used by Default `warehouse`.
@@ -142,14 +143,18 @@ def get_data(
                 logger.info(f"Size in memory: {results.nbytes / 1024**3 : .3f} GB")
 
             if to_lowercase_cols:
-                results = results.rename_columns([col.lower() for col in results.column_names])
+                results = results.rename_columns(
+                    [col.lower() for col in results.column_names]
+                )
         else:
             logger.info("Loading results into Pandas DataFrame.")
             results = cur.fetch_pandas_all()
 
             if verbose:
                 logger.info(f"Shape: {results.shape}")
-                logger.info(f"Size in memory: {results.memory_usage(deep=True).sum() / 1024**3 : .3f} GB")
+                logger.info(
+                    f"Size in memory: {results.memory_usage(deep=True).sum() / 1024**3 : .3f} GB"
+                )
 
             if to_lowercase_cols:
                 results.columns = results.columns.str.lower()
@@ -164,7 +169,8 @@ def get_data_result_batches(
     warehouse: str | None = None,
     is_production: bool = False,
 ) -> list[snowflake.connector.result_batch.ArrowResultBatch]:
-    """Queries Snowflake and returns a list of pointers to the underlying results which are stored in chunked parquet files
+    """Queries Snowflake and returns a list of pointers to the underlying results which are stored in chunked
+    parquet files
     behind the scenes. Can be used alongside `prepare_result_batch()` to replicate common access patterns from
     `get_data()` in a distributed workflow.
 
@@ -195,7 +201,9 @@ def get_data_result_batches(
 
         cur.execute(command=query, params=params)
         result_batches = cur.get_result_batches()
-        logger.info(f"Results chunked in {len(result_batches)} batches with total row count: {cur.rowcount}")
+        logger.info(
+            f"Results chunked in {len(result_batches)} batches with total row count: {cur.rowcount}"
+        )
         return result_batches
 
 
@@ -242,14 +250,18 @@ def prepare_result_batch(
             logger.info(f"Size in memory: {results.nbytes / 1024**3 : .3f} GB")
 
         if to_lowercase_cols:
-            results = results.rename_columns([col.lower() for col in results.column_names])
+            results = results.rename_columns(
+                [col.lower() for col in results.column_names]
+            )
 
     else:
         results = result_batch.to_pandas()
 
         logger.info(f"Shape: {results.shape}")
         if verbose:
-            logger.info(f"Size in memory: {results.memory_usage(deep=True).sum() / 1024**3 : .3f} GB")
+            logger.info(
+                f"Size in memory: {results.memory_usage(deep=True).sum() / 1024**3 : .3f} GB"
+            )
 
         if to_lowercase_cols:
             results.columns = results.columns.str.lower()
@@ -264,7 +276,8 @@ def get_data_batches(
     as_pyarrow_table: bool = False,
     verbose: bool = False,
 ) -> Iterator[pd.DataFrame | pa.Table]:
-    """Generator that yields materialized Pandas DataFrames or PyArrow Tables of subsets of the Snowflake query result set.
+    """Generator that yields materialized Pandas DataFrames or PyArrow Tables of subsets of the Snowflake
+    query result set.
     The size of each batch is controlled by Snowflake and cannot be configured.
 
     This can be useful when subsets of the data can be operated on independently and/or in combination with Metaflow

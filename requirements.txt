@@ -1,5 +1,5 @@
---extra-index-url https://artifactory.moveaws.com/artifactory/api/pypi/InnerOpenSource-shared-pypi-local/simple
---trusted-host artifactory.moveaws.com
+# --extra-index-url https://artifactory.moveaws.com/artifactory/api/pypi/InnerOpenSource-shared-pypi-local/simple
+# --trusted-host artifactory.moveaws.com
 
 # NOTE: build and twine are required by the pipeline.
 pygments>=2.7.4 # not directly required, pinned by Snyk to avoid a vulnerability

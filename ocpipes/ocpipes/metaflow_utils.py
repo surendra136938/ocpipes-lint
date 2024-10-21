@@ -17,7 +17,12 @@ def profile_memory(f):
     def func(self, *args, **kwargs):
         from memory_profiler import memory_usage
 
-        self.mem_usage = memory_usage((f, (self, *args), {**kwargs}), max_iterations=1, max_usage=True, interval=0.2)
+        self.mem_usage = memory_usage(
+            (f, (self, *args), {**kwargs}),
+            max_iterations=1,
+            max_usage=True,
+            interval=0.2,
+        )
         print(f"Peak memory usage (in MB): {self.mem_usage:.2f}")
 
     return func
@@ -81,9 +86,19 @@ def pip(libraries):
                 for library, version in libraries.items():
                     print("Pip Install:", library, version)
                     if version != "":
-                        subprocess.run([sys.executable, "-m", "pip", "install", library + "==" + version])
+                        subprocess.run(
+                            [
+                                sys.executable,
+                                "-m",
+                                "pip",
+                                "install",
+                                library + "==" + version,
+                            ]
+                        )
                     else:
-                        subprocess.run([sys.executable, "-m", "pip", "install", library])
+                        subprocess.run(
+                            [sys.executable, "-m", "pip", "install", library]
+                        )
 
             return function(*args, **kwargs)
 
@@ -156,7 +171,9 @@ def latest_successful_runs_using_tags(
         tags = []
     runs = list(Flow(flow_name).runs(*tags))
     if verbose:
-        None if runs else print("Runs is empty. Specify tags that exist or remove for latest successful run.")
+        None if runs else print(
+            "Runs is empty. Specify tags that exist or remove for latest successful run."
+        )
     count = 0
     run_successes = []
     for run in runs:
@@ -169,7 +186,9 @@ def latest_successful_runs_using_tags(
         if num_runs and count == num_runs:
             break
     if verbose:
-        None if run_successes else print("Didn't find a successful run. Redefine or remove tags.")
+        None if run_successes else print(
+            "Didn't find a successful run. Redefine or remove tags."
+        )
 
     return run_successes
 
@@ -195,7 +214,9 @@ def make_feature_importance_card(feature_importances: DataFrame, card_id: str) -
             ]
         )
     print("Making card for feature importances.")
-    current.card[card_id].append(Markdown("##  Model feature importances"))  # pylint: disable=no-member
+    current.card[card_id].append(
+        Markdown("##  Model feature importances")
+    )  # pylint: disable=no-member
     feature_cols = feature_importances.columns
     current.card[card_id].append(  # pylint: disable=no-member
         Table(card_importances, headers=["Rank", feature_cols[0], feature_cols[1]])

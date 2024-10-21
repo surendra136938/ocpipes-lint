@@ -93,7 +93,7 @@ jobs:
           command: python --version
       - run:
           name: linting
-          command: python -m invoke lint1.run
+          command: invoke lint1.run
   build_conda_package:
     executor: ubuntu-conda-executor
     steps:

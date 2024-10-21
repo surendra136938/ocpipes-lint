@@ -91,8 +91,12 @@ class SlackNotification:
 
         # tbd: guardrail certain channels for dev vs prod?
         assert self.channel and isinstance(self.channel, str)
-        assert self.notify is None or all((user and isinstance(user, str)) for user in self.notify)
-        assert self.thread_ts is None or (self.thread_ts and isinstance(self.thread_ts, str))
+        assert self.notify is None or all(
+            (user and isinstance(user, str)) for user in self.notify
+        )
+        assert self.thread_ts is None or (
+            self.thread_ts and isinstance(self.thread_ts, str)
+        )
         assert isinstance(self.notification_type, SlackNotificationType)
         assert isinstance(self.persona, SlackPersona)
         assert isinstance(self.emoji, SlackPersonaIconEmoji)
@@ -103,7 +107,9 @@ class SlackNotification:
 
         elif self.notification_type == SlackNotificationType.IMAGE:
             assert self.image and all(isinstance(image, Image) for image in self.image)
-            assert self.message is None or (self.message and isinstance(self.message, str))
+            assert self.message is None or (
+                self.message and isinstance(self.message, str)
+            )
 
         elif self.notification_type == SlackNotificationType.TABLE:
             raise NotImplementedError
@@ -266,7 +272,9 @@ class SlackNotification:
                     if current.is_running_flow
                     else uuid.uuid1().hex[:8]
                 )
-                file_uploads.append({"filename": filename, "content": _extract_image_bytes(image)})
+                file_uploads.append(
+                    {"filename": filename, "content": _extract_image_bytes(image)}
+                )
 
             response = client.files_upload_v2(file_uploads=file_uploads)
             for file in response.get("files"):
@@ -348,7 +356,9 @@ class SlackNotification:
 
         return payload
 
-    def _slack_image_payload_v2(self, permalinks: dict[str, str]) -> dict[str, Any] | None:
+    def _slack_image_payload_v2(
+        self, permalinks: dict[str, str]
+    ) -> dict[str, Any] | None:
         blocks = []
 
         notify_block = self._get_notify_block()

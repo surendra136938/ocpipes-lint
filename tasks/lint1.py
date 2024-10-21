@@ -76,19 +76,15 @@ def eof_newline(c: Context, fix: bool = False) -> None:
         exit(1)
 
 
-@task(
-    help={
-        "directory": "Specify directory to lint",
-    }
-)
-def ruff(c: Context, directory: str = "ocpipes") -> None:
+@task
+def ruff(c: Context) -> None:
     """
     Run the Ruff linter for the ocpipes directory. This will run in check mode based on the pyproject.toml
     file settings in the ocpipes directory.
     Example usage:
-    invoke lint.ruff --directory <your_directory>
+    invoke lint.ruff --fix
     """
-    c.run(f"python3 -m ruff check {directory}")
+    c.run(f"python3 -m ruff check {lint_files}")
 
 
 @task(
@@ -101,5 +97,5 @@ def run(c: Context, fix: bool = False) -> None:
     """
     black(c, fix)
     flake8(c)
-    ruff(c, directory)
+    ruff(c)
     eof_newline(c, fix)

@@ -50,7 +50,9 @@ class DaemonS3Sync(Thread):
         >>>     ... train code ...
     """
 
-    def __init__(self, local_path: str, s3_uri: str, interval: int = 300, timeout: int = None):
+    def __init__(
+        self, local_path: str, s3_uri: str, interval: int = 300, timeout: int = None
+    ):
         """
         Args:
             local_path (str): Local directory and its contents to sync.
@@ -96,4 +98,3 @@ class DaemonS3Sync(Thread):
 
     def __exit__(self, *args, **kwargs):
         self.stop()
-

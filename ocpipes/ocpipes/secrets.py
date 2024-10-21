@@ -43,7 +43,11 @@ class ConnectionSecrets:
         self._secrets = get_secret(secret_id=secret_id)
 
     def _get_value_env_secret_or_default(
-        self, value: str | int | None, env_key: str | None, secret_key: str | None, default_val: str | int | None
+        self,
+        value: str | int | None,
+        env_key: str | None,
+        secret_key: str | None,
+        default_val: str | int | None,
     ) -> str | int | None:
         if value:
             return value
@@ -73,7 +77,9 @@ class SnowflakeConnectionSecrets(ConnectionSecrets):
     _env_database = "SNOWFLAKE_DATABASE"
     _env_schema = "SNOWFLAKE_SCHEMA"
 
-    _secret_id = "arn:aws:secretsmanager:us-east-1:786346568665:secret:DS_Snowflake-KFiHoP"
+    _secret_id = (
+        "arn:aws:secretsmanager:us-east-1:786346568665:secret:DS_Snowflake-KFiHoP"
+    )
     _secret_public_key = "RSA_2048_Public_Key_PEM_Base64"
     _secret_private_key = "RSA_2048_Private_Key_PEM_Base64"
     _secret_encryption_password = "ENCRYPTION_PASSWORD"
@@ -139,7 +145,9 @@ class SnowflakeConnectionSecrets(ConnectionSecrets):
 
     @user.setter
     def user(self, value: str | None):
-        user = self._get_value_env_secret_or_default(value, self._env_user, None, self._default_user_dev)
+        user = self._get_value_env_secret_or_default(
+            value, self._env_user, None, self._default_user_dev
+        )
 
         if not self.is_production and not user:
             raise ValueError(
@@ -166,7 +174,9 @@ class SnowflakeConnectionSecrets(ConnectionSecrets):
 
     @role.setter
     def role(self, value: str | None):
-        self._role = self._get_value_env_secret_or_default(value, self._env_role, None, self._default_role)
+        self._role = self._get_value_env_secret_or_default(
+            value, self._env_role, None, self._default_role
+        )
 
     @property
     def account(self) -> str:
@@ -174,7 +184,9 @@ class SnowflakeConnectionSecrets(ConnectionSecrets):
 
     @account.setter
     def account(self, value: str | None):
-        self._account = self._get_value_env_secret_or_default(value, self._env_account, None, self._default_account)
+        self._account = self._get_value_env_secret_or_default(
+            value, self._env_account, None, self._default_account
+        )
 
     @property
     def warehouse(self) -> str:
@@ -187,7 +199,9 @@ class SnowflakeConnectionSecrets(ConnectionSecrets):
         if self.is_production and self.user == self._default_user_prod:
             default_warehouse = self._default_warehouse_prod
 
-        self._warehouse = self._get_value_env_secret_or_default(value, self._env_warehouse, None, default_warehouse)
+        self._warehouse = self._get_value_env_secret_or_default(
+            value, self._env_warehouse, None, default_warehouse
+        )
 
     @property
     def database(self) -> str:
@@ -200,7 +214,9 @@ class SnowflakeConnectionSecrets(ConnectionSecrets):
         if self.is_production and self.user == self._default_user_prod:
             default_database = self._default_database_prod
 
-        self._database = self._get_value_env_secret_or_default(value, self._env_database, None, default_database)
+        self._database = self._get_value_env_secret_or_default(
+            value, self._env_database, None, default_database
+        )
 
     @property
     def schema(self) -> str:
@@ -208,7 +224,9 @@ class SnowflakeConnectionSecrets(ConnectionSecrets):
 
     @schema.setter
     def schema(self, value: str | None):
-        self._schema = self._get_value_env_secret_or_default(value, self._env_schema, None, self._default_schema)
+        self._schema = self._get_value_env_secret_or_default(
+            value, self._env_schema, None, self._default_schema
+        )
 
 
 class SlackConnectionSecrets(ConnectionSecrets):
@@ -229,7 +247,9 @@ class SlackConnectionSecrets(ConnectionSecrets):
 class PineconeConnectionSecrets(ConnectionSecrets):
     """Holds the Pinecone API token."""
 
-    _secret_id = "arn:aws:secretsmanager:us-east-1:786346568665:secret:DS_Pinecone-3XLguG"
+    _secret_id = (
+        "arn:aws:secretsmanager:us-east-1:786346568665:secret:DS_Pinecone-3XLguG"
+    )
     _secret_api_key_default = "default"
 
     def __init__(self) -> None:
@@ -251,7 +271,9 @@ class DBConnectionSecrets(ConnectionSecrets):
     _env_ds_db_port = "OCDBPORT"
     _env_ds_db_dbname = "OCDBNAME"
 
-    _secret_id = "arn:aws:secretsmanager:us-east-1:786346568665:secret:DS-DB-Root-User-NRvuGd"
+    _secret_id = (
+        "arn:aws:secretsmanager:us-east-1:786346568665:secret:DS-DB-Root-User-NRvuGd"
+    )
     _secret_ds_db_username = "username"
     _secret_ds_db_password = "password"
     _secret_ds_db_engine = "engine"
@@ -262,7 +284,9 @@ class DBConnectionSecrets(ConnectionSecrets):
     _default_ds_db_username = "opcity"
     _default_ds_db_password = None
     _default_ds_db_engine = "postgresql+psycopg2"
-    _default_ds_db_host = "ds-db-cluster.cluster-cbnawlmjvuti.us-east-1.rds.amazonaws.com"
+    _default_ds_db_host = (
+        "ds-db-cluster.cluster-cbnawlmjvuti.us-east-1.rds.amazonaws.com"
+    )
     _default_ds_db_port = 5432
     _default_ds_db_dbname = "opcity"
 
@@ -294,7 +318,10 @@ class DBConnectionSecrets(ConnectionSecrets):
     @username.setter
     def username(self, value: str | None):
         self._username = self._get_value_env_secret_or_default(
-            value, self._env_ds_db_username, self._secret_ds_db_username, self._default_ds_db_username
+            value,
+            self._env_ds_db_username,
+            self._secret_ds_db_username,
+            self._default_ds_db_username,
         )
 
     @property
@@ -304,7 +331,10 @@ class DBConnectionSecrets(ConnectionSecrets):
     @password.setter
     def password(self, value: str | None):
         self._password = self._get_value_env_secret_or_default(
-            value, self._env_ds_db_password, self._secret_ds_db_password, self._default_ds_db_password
+            value,
+            self._env_ds_db_password,
+            self._secret_ds_db_password,
+            self._default_ds_db_password,
         )
 
     @property
@@ -314,7 +344,10 @@ class DBConnectionSecrets(ConnectionSecrets):
     @engine.setter
     def engine(self, value: str | None):
         self._engine = self._get_value_env_secret_or_default(
-            value, self._env_ds_db_engine, self._secret_ds_db_engine, self._default_ds_db_engine
+            value,
+            self._env_ds_db_engine,
+            self._secret_ds_db_engine,
+            self._default_ds_db_engine,
         )
 
     @property
@@ -324,7 +357,10 @@ class DBConnectionSecrets(ConnectionSecrets):
     @host.setter
     def host(self, value: str | None):
         self._host = self._get_value_env_secret_or_default(
-            value, self._env_ds_db_host, self._secret_ds_db_host, self._default_ds_db_host
+            value,
+            self._env_ds_db_host,
+            self._secret_ds_db_host,
+            self._default_ds_db_host,
         )
 
     @property
@@ -334,7 +370,10 @@ class DBConnectionSecrets(ConnectionSecrets):
     @port.setter
     def port(self, value: str | None):
         self._port = self._get_value_env_secret_or_default(
-            value, self._env_ds_db_port, self._secret_ds_db_port, self._default_ds_db_port
+            value,
+            self._env_ds_db_port,
+            self._secret_ds_db_port,
+            self._default_ds_db_port,
         )
 
     @property
@@ -344,5 +383,8 @@ class DBConnectionSecrets(ConnectionSecrets):
     @dbname.setter
     def dbname(self, value: str | None):
         self._dbname = self._get_value_env_secret_or_default(
-            value, self._env_ds_db_dbname, self._secret_ds_db_dbname, self._default_ds_db_dbname
+            value,
+            self._env_ds_db_dbname,
+            self._secret_ds_db_dbname,
+            self._default_ds_db_dbname,
         )
