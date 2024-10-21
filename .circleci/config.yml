@@ -10,6 +10,8 @@ executors:
   container:
     docker:
       - image: cimg/python:3.9
+        environment:
+          PYTHONPATH: /home/circleci/project/lib
       
 jobs:
   download-from-s3:
@@ -63,8 +65,13 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - attach_workspace:
-          at: /tmp/ocpipes-working
+      - checkout
+      - run:
+          name: setup lib directory
+          command: mkdir ./lib
+      - run:
+          name: Install python requirements
+          command: pip3 install --no-cache-dir -r requirements.txt -t ./lib
       - run:
           name: Install invoke
           command: pip install invoke
