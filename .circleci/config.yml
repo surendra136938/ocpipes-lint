@@ -70,16 +70,16 @@ jobs:
       - run:
           name: Install invoke
           command: pip install invoke
-      - run:
-          name: List workspace content
-          command: |
-            echo "Listing files in the current directory:"
-            cd /tmp/ocpipes-working
-            ls -la
-            echo "Listing files in ocpipes directory:"
-            ls -la ocpipes
-            echo "Listing files in tasks directory:"
-            ls -la tasks
+      # - run:
+      #     name: List workspace content
+      #     command: |
+      #       echo "Listing files in the current directory:"
+      #       cd /tmp/ocpipes-working
+      #       ls -la
+      #       echo "Listing files in ocpipes directory:"
+      #       ls -la ocpipes
+      #       echo "Listing files in tasks directory:"
+      #       ls -la tasks
       - run:
           name: Debugging Environment Variables
           command: |
