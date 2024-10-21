@@ -85,6 +85,7 @@ jobs:
           command: |
             echo "Current Python Path: $PYTHONPATH"
             echo "Current working directory: $(pwd)"
+            invoke --list
             echo "Environment Variables:"
             env
       - run:
