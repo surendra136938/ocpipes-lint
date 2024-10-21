@@ -74,6 +74,7 @@ jobs:
           name: List workspace content
           command: |
             echo "Listing files in the current directory:"
+            cd /tmp/ocpipes-working
             ls -la
             echo "Listing files in ocpipes directory:"
             ls -la ocpipes
