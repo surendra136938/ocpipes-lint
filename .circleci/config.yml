@@ -72,9 +72,6 @@ jobs:
       - run:
           name: Install python requirements
           command: pip3 install --no-cache-dir -r requirements.txt -t ./lib
-      - run:
-          name: Install invoke
-          command: pip install invoke
       # - run:
       #     name: List workspace content
       #     command: |
@@ -90,7 +87,6 @@ jobs:
           command: |
             echo "Current Python Path: $PYTHONPATH"
             echo "Current working directory: $(pwd)"
-            invoke --list
             echo "Environment Variables:"
             env
       - run:
@@ -98,7 +94,7 @@ jobs:
           command: python --version
       - run:
           name: linting
-          command: invoke lint1.run
+          command: python3 -m invoke lint1.run
   build_conda_package:
     executor: ubuntu-conda-executor
     steps:
