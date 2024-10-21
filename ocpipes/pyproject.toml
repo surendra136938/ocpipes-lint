@@ -1,0 +1,8 @@
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+
+ignore = [
+    "ANN001",  # Missing type annotation for function argument 
+    "E722"  ,  # Do not use bare except
+]
