@@ -69,6 +69,25 @@ jobs:
           name: Install invoke
           command: pip install invoke
       - run:
+          name: List workspace content
+          command: |
+            echo "Listing files in the current directory:"
+            ls -la
+            echo "Listing files in ocpipes directory:"
+            ls -la ocpipes
+            echo "Listing files in tasks directory:"
+            ls -la tasks
+      - run:
+          name: Debugging Environment Variables
+          command: |
+            echo "Current Python Path: $PYTHONPATH"
+            echo "Current working directory: $(pwd)"
+            echo "Environment Variables:"
+            env
+      - run:
+          name: Debug Python Version
+          command: python --version
+      - run:
           name: linting
           command: python -m invoke lint1.run
   build_conda_package:
