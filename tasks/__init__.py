@@ -1,5 +1,5 @@
 from invoke import Collection
 
-from tasks import lint1
+from tasks import lint
 
-namespace = Collection(lint1)
+namespace = Collection(lint)

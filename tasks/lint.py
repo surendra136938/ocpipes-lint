@@ -3,69 +3,35 @@ from typing import List
 
 from invoke import Context, task
 
+lint_files = "ocpipes"
 binary_extensions = ["zip", "gz", "tar", "png", "gif", "jpg", "pyc", "ipynb", "parquet"]
 
 
-@task(
-    help={
-        "fix": "instruct Black to automatically fix errors that it finds",
-        "directory": "Specify directories to lint",
-    }
-)
-def black(c: Context, fix: bool = False, directory: str = "src tasks test") -> None:
+@task(help={"fix": "instruct Black to automatically fix errors that it finds"})
+def black(c: Context, fix: bool = False) -> None:
     """
-    Run the Black formatter. By default, this will run in "check mode" and provide output. To automatically fix errors
-    found by Black, set --fix. You can specify the optional argument(directory) to the lint.
-    Example usage:
-    invoke lint.black --fix --directory <your_directory>
+    Run the Black formatter. Be default this will run in "check mode" and provide output. To automatically fix errors
+    found by Black, set --fix
+    example Usage:
+    invoke lint.black --fix
     """
     if fix:
-        # The "directory" argument is used instead of "lint_files" to enable conditional
-        # linting based on changes in the "ocpipes" directory. This approach allows us to
-        # dynamically pass the directories that need to be linted, ensuring that only relevant
-        # files are checked when specific directories have changes.
-        c.run(f"python3 -m black {directory}")
+        c.run(f"python3 -m black {lint_files}")
     else:
-        c.run(f"python3 -m black --check {directory}")
+        c.run(f"python3 -m black --check {lint_files}")
 
 
-@task(help={"directory": "Specify directories to lint"})
-def flake8(c: Context, directory: str = "src tasks test") -> None:
+@task
+def flake8(c: Context) -> None:
     """
     Run the Flake8 linter. Flake8 discovers common mistakes that can lead to unmaintainable code. Flake8 will not
     automatically fix the errors, it will list the file and line number where the errors are located and a brief
     description.
     """
-    c.run(f"python3 -m flake8 {directory}")
+    c.run(f"python3 -m flake8 {lint_files}")
 
-
-@task(
-    help={
-        "fix": "instruct isort to automatically fix errors that it finds",
-        "directory": "Specify directories to lint",
-    }
-)
-def import_sort(
-    c: Context, fix: bool = False, directory: str = "src tasks test"
-) -> None:
-    """
-    Run the isort formatter. By default, this will run in "check mode" and provide output. To automatically fix errors
-    found by isort, set --fix. You can specify directories to lint. You can specify the optional
-    argument(directory) to the lint.
-    example Usage:
-    invoke lint.import_sort --fix --directory <your_directory>
-    """
-    if fix:
-        c.run(f"python3 -m isort --profile=black {directory}")
-    else:
-        c.run(f"python3 -m isort --profile=black --check-only {directory}")
-
-
-@task(
-    help={
-        "fix": "Automatically fix missing EOF newlines",
-    }
-)
+    
+@task(help={"fix": "Automatically fix missing EOF newlines"})
 def eof_newline(c: Context, fix: bool = False) -> None:
     """
     Checks if there is a Newline at the end of a file
@@ -110,36 +76,26 @@ def eof_newline(c: Context, fix: bool = False) -> None:
         exit(1)
 
 
-@task(
-    help={
-        "directory": "Specify directory to lint",
-    }
-)
-def ruff(c: Context, directory: str = "ocpipes") -> None:
+@task
+def ruff(c: Context) -> None:
     """
     Run the Ruff linter for the ocpipes directory. This will run in check mode based on the pyproject.toml
     file settings in the ocpipes directory.
     Example usage:
-    invoke lint.ruff --directory <your_directory>
+    invoke lint.ruff --fix
     """
-    c.run(f"python3 -m ruff check {directory}")
+    c.run(f"python3 -m ruff check {lint_files}")
 
 
 @task(
-    help={
-        "fix": "instruct linting tools to automatically fix errors that they find",
-        "directory": "Specify directories to lint",
-    }
+    help={"fix": "instruct linting tools to automatically fix errors that they finds"}
 )
-def run(c: Context, fix: bool = False, directory: str = "src tasks test") -> None:
+def run(c: Context, fix: bool = False) -> None:
     """
     Run all linting tools. Defaults to checking for errors only. To automatically fix errors use `--fix`.
     NOTE: Not all tools support automatically fixing errors.
     """
-    black(c, fix, directory)
-    flake8(c, directory)
-    if directory == "src tasks test":
-        import_sort(c, fix, directory)
-    if directory == "ocpipes":
-        ruff(c, directory)
+    black(c, fix)
+    flake8(c)
+    ruff(c)
     eof_newline(c, fix)

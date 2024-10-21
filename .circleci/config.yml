@@ -75,7 +75,7 @@ jobs:
           command: pip3 install --no-cache-dir -r requirements.txt -t ./lib
       - run:
           name: linting
-          command: python3 -m invoke lint1.run
+          command: python3 -m invoke lint.run
   
   build_conda_package:
     executor: ubuntu-conda-executor
@@ -233,11 +233,12 @@ workflows:
   build-pipeline:
     jobs:
       - linting:
-          context: [aws]
           filters:
             branches:
               only: ocpipes-linting
       - download-from-s3:
+          requires:
+            - linting
           context: [aws]
           filters:
             branches:
@@ -258,6 +259,8 @@ workflows:
             - build_conda_package
           context: [aws]
       - build_and_upload_wheel:
+          requires:
+            - linting
           filters:
             branches:
               only: ocpipes-linting
