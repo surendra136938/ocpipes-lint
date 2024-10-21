@@ -55,7 +55,7 @@ jobs:
           root: /tmp/ocpipes-working
           paths:
             - ocpipes
-  ocpipes-lint:
+  linting:
     executor: container
     steps:
       - attach_workspace:
