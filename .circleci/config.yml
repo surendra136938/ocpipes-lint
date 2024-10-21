@@ -60,6 +60,7 @@ jobs:
           root: /tmp/ocpipes-working
           paths:
             - ocpipes
+  
   linting:
     executor: container
     steps:
@@ -72,29 +73,10 @@ jobs:
       - run:
           name: Install python requirements
           command: pip3 install --no-cache-dir -r requirements.txt -t ./lib
-      # - run:
-      #     name: List workspace content
-      #     command: |
-      #       echo "Listing files in the current directory:"
-      #       cd /tmp/ocpipes-working
-      #       ls -la
-      #       echo "Listing files in ocpipes directory:"
-      #       ls -la ocpipes
-      #       echo "Listing files in tasks directory:"
-      #       ls -la tasks
-      - run:
-          name: Debugging Environment Variables
-          command: |
-            echo "Current Python Path: $PYTHONPATH"
-            echo "Current working directory: $(pwd)"
-            echo "Environment Variables:"
-            env
-      - run:
-          name: Debug Python Version
-          command: python --version
       - run:
           name: linting
           command: python3 -m invoke lint1.run
+  
   build_conda_package:
     executor: ubuntu-conda-executor
     steps:
@@ -255,28 +237,28 @@ workflows:
           filters:
             branches:
               only: ocpipes-linting
-      # - download-from-s3:
-      #     context: [aws]
-      #     filters:
-      #       branches:
-      #         only: ocpipes-linting
-      # - build_conda_package:
-      #     requires:
-      #       - download-from-s3
-      #     filters:
-      #       branches:
-      #         only: ocpipes-linting
-      #     context:
-      #       - aws
-      # - upload-to-s3:
-      #     filters:
-      #       branches:
-      #         only: ocpipes-linting
-      #     requires:
-      #       - build_conda_package
-      #     context: [aws]
-      # - build_and_upload_wheel:
-      #     filters:
-      #       branches:
-      #         only: ocpipes-linting
-      #     context: [aws]
+      - download-from-s3:
+          context: [aws]
+          filters:
+            branches:
+              only: ocpipes-linting
+      - build_conda_package:
+          requires:
+            - download-from-s3
+          filters:
+            branches:
+              only: ocpipes-linting
+          context:
+            - aws
+      - upload-to-s3:
+          filters:
+            branches:
+              only: ocpipes-linting
+          requires:
+            - build_conda_package
+          context: [aws]
+      - build_and_upload_wheel:
+          filters:
+            branches:
+              only: ocpipes-linting
+          context: [aws]
