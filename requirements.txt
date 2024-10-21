@@ -1,45 +1,4 @@
-# --extra-index-url https://artifactory.moveaws.com/artifactory/api/pypi/InnerOpenSource-shared-pypi-local/simple
-# --trusted-host artifactory.moveaws.com
-
-# NOTE: build and twine are required by the pipeline.
-pygments>=2.7.4 # not directly required, pinned by Snyk to avoid a vulnerability
-
-# The follow requirements are specific to the module. If you want Pip to manage
-# your requirements when someone installs your modules, they must be specified
-# in setup.cfg. These requirements are only for local development, building,
-# and testing
-
-# Note: Development requirements like pytest do NOT need to be installed with
-# your module. Only other modules that your module specifically calls / requires
-
-coverage==6.0
-importlib-metadata<5.0
 black==22.3.0
 flake8==3.8.4
 invoke==2.1.3
-isort==5.9.3
-mypy==1.4
-types-requests==2.26.2
-pytest
 ruff==0.6.4
-setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
-
-# Module requirements
-asn1crypto~=1.4.0
-certifi~=2023.7.22 # pinned to avoid a vulnerability
-cffi~=1.15.0
-charset-normalizer~=2.0.9
-cryptography~=41.0.2 # pinned to avoid a vulnerability
-idna~=3.3
-oscrypto~=1.2.1
-pycparser~=2.21
-pycryptodomex~=3.12.0
-PyJWT~=2.4.0
-pyOpenSSL~=23.2.0
-pytz~=2021.3
-requests~=2.32.0
-six~=1.16.0
-snowflake-connector-python>=3.0.0, <4.0.0
-urllib3~=1.26.7
-flatten_avro_schema~=2.0
-common_logger_python~=1.0
