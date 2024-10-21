@@ -70,7 +70,7 @@ jobs:
           command: pip install invoke
       - run:
           name: linting
-          command: python -m invoke lint.run
+          command: python -m invoke lint1.run
   build_conda_package:
     executor: ubuntu-conda-executor
     steps:
