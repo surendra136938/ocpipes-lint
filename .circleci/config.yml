@@ -10,9 +10,7 @@ executors:
   container:
     docker:
       - image: cimg/python:3.9
-        environment:
-          PYTHONPATH: /home/circleci/project/lib
-
+      
 jobs:
   download-from-s3:
     docker:
