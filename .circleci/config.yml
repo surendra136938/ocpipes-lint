@@ -65,6 +65,8 @@ jobs:
     steps:
       - attach_workspace:
           at: .
+      - attach_workspace:
+          at: /tmp/ocpipes-working
       - run:
           name: Install invoke
           command: pip install invoke
