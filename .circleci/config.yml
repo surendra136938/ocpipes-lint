@@ -66,6 +66,9 @@ jobs:
       - attach_workspace:
           at: .
       - run:
+          name: Install invoke
+          command: pip install invoke
+      - run:
           name: linting
           command: python -m invoke lint.run
   build_conda_package:
