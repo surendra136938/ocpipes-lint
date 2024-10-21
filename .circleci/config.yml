@@ -55,7 +55,14 @@ jobs:
           root: /tmp/ocpipes-working
           paths:
             - ocpipes
-
+  ocpipes-lint:
+    executor: container
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: ocpipes-lint
+          command: python -m invoke lint.run
   build_conda_package:
     executor: ubuntu-conda-executor
     steps:
@@ -211,28 +218,33 @@ jobs:
 workflows:
   build-pipeline:
     jobs:
+      - linting:
+          context: [aws]
+          filters:
+            branches:
+              only: ocpipes-lint
       - download-from-s3:
           context: [aws]
           filters:
             branches:
-              only: main
+              only: ocpipes-lint
       - build_conda_package:
           requires:
             - download-from-s3
           filters:
             branches:
-              only: main
+              only: ocpipes-lint
           context:
             - aws
       - upload-to-s3:
           filters:
             branches:
-              only: main
+              only: ocpipes-lint
           requires:
             - build_conda_package
           context: [aws]
       - build_and_upload_wheel:
           filters:
             branches:
-              only: main
+              only: ocpipes-lint
           context: [aws]
