@@ -235,26 +235,26 @@ workflows:
       - linting:
           filters:
             branches:
-              only: ocpipes-linting
+              only: main
       - download-from-s3:
           requires:
             - linting
           context: [aws]
           filters:
             branches:
-              only: ocpipes-linting
+              only: main
       - build_conda_package:
           requires:
             - download-from-s3
           filters:
             branches:
-              only: ocpipes-linting
+              only: main
           context:
             - aws
       - upload-to-s3:
           filters:
             branches:
-              only: ocpipes-linting
+              only: main
           requires:
             - build_conda_package
           context: [aws]
@@ -263,5 +263,5 @@ workflows:
             - linting
           filters:
             branches:
-              only: ocpipes-linting
+              only: main
           context: [aws]
